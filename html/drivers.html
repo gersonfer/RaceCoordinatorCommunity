@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Lista de Pilotos</title>
+  <link rel="stylesheet" href="style/rc.css">
+  <script src="scripts/jquery-1.9.1.min.js"></script>
+  <script>
+    function initDrivers() {
+      const apiUrl = location.protocol + '//' + location.host + '/api?q=8'; // tipo 8: raceDriverData
+
+      $.getJSON(apiUrl, function(json) {
+        const driversDiv = document.getElementById('drivers');
+        driversDiv.innerHTML = '';
+
+        const raceDriverData = json.r.find(x => x.q === 8);
+
+        if (raceDriverData && raceDriverData.d) {
+          raceDriverData.d.forEach(driver => {
+            const a = document.createElement('a');
+            a.href = `driverdetail.html?did=${driver.did}`;
+            a.textContent = driver.nn;
+            a.style.display = 'block';
+            a.style.margin = '8px 0';
+            driversDiv.appendChild(a);
+          });
+        } else {
+          driversDiv.innerHTML = '<p>Nenhum piloto encontrado.</p>';
+        }
+      }).fail(function(err) {
+        document.getElementById('drivers').innerHTML = '<p>Erro ao carregar dados.</p>';
+      });
+    }
+  </script>
+</head>
+<body onload="initDrivers()" class="anlgbody">
+  <div id="menu">
+    <script src="scripts/menu.js"></script>
+    <script>displayMenu(-1);</script>
+  </div>
+  <h2 style="margin-left: 10px;">Lista de Pilotos</h2>
+  <div id="drivers" style="padding: 10px; font-size: 18px;"></div>
+</body>
+</html>

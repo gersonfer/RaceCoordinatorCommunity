@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Geral - Race Coordinator</title>
+  <style>
+    body {
+      background-color: #1E1E1E;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #race-info {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: auto;
+    }
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #444;
+    }
+    th {
+      background-color: #333;
+    }
+    .lane-color {
+      color: #000;
+      font-weight: bold;
+    }
+    .finished {
+      background-color: #444 !important;
+      color: #ccc !important;
+    }
+    .status-clock {
+      display: inline-block;
+      padding: 8px;
+      border-radius: 4px;
+      color: white;
+    }
+    .green {
+      background-color: green;
+    }
+    .yellow {
+      background-color: yellow;
+      color: black;
+    }
+    .red {
+      background-color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>GP Semana 12 - Classificação Geral</h1>
+  <div id="race-info">
+    Pista: <span id="track-name">---</span> | Data: <span id="race-date">---</span> | Hora: <span id="race-time">---</span> | <span id="race-status" class="status-clock">--:--</span>
+  </div>
+
+  <table id="leaderboard">
+    <thead>
+      <tr>
+        <th>Pos</th>
+        <th>Piloto</th>
+        <th>Race</th>
+        <th>Fenda</th>
+        <th>Voltas</th>
+        <th>Fração</th>
+        <th>Média V</th>
+        <th>Projeção</th>
+        <th>Última</th>
+        <th>Média</th>
+        <th>Best</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboard-body">
+      <!-- Dados dinâmicos -->
+    </tbody>
+  </table>
+
+<script>
+  const apiUrl = 'http://100.106.50.98:8080/api?q=[{"raceDriverData":0}]';
+
+  const laneColors = {
+    1: '#FF0000', // Vermelho
+    2: '#FFFFFF', // Branco
+    3: '#00FF00', // Verde
+    4: '#FFA500', // Laranja
+    5: '#0000FF', // Azul
+    6: '#FFFF00', // Amarelo
+    7: '#800080', // Roxo
+    8: '#000000'  // Preto
+  };
+
+  async function fetchRaceData() {
+    try {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      updateLeaderboard(data);
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+    }
+  }
+
+  function updateLeaderboard(data) {
+    const tbody = document.getElementById('leaderboard-body');
+    tbody.innerHTML = '';
+
+    // Atualiza info cabeçalho
+    document.getElementById('track-name').textContent = data.trackName || 'Demo Track';
+    document.getElementById('race-date').textContent = new Date().toLocaleDateString();
+    document.getElementById('race-time').textContent = new Date().toLocaleTimeString();
+
+    // Exemplo de status para o relógio
+    const raceStatus = document.getElementById('race-status');
+    raceStatus.textContent = data.raceStatus || 'Running';
+    raceStatus.className = `status-clock ${data.raceStatus === 'Running' ? 'green' : data.raceStatus === 'Paused' ? 'yellow' : 'red'}`;
+
+    data.raceDrivers.forEach((driver, index) => {
+      const tr = document.createElement('tr');
+
+      if (driver.hasFinished) {
+        tr.classList.add('finished');
+      }
+
+      const laneColor = laneColors[driver.lane] || '#666';
+
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${driver.name}</td>
+        <td>${driver.race}</td>
+        <td style="background-color: ${laneColor};" class="lane-color">${driver.lane}</td>
+        <td>${driver.laps}</td>
+        <td>${driver.fraction.toFixed(3)}</td>
+        <td>${driver.avgLapsPerHeat.toFixed(1)}</td>
+        <td>${driver.projectedLaps.toFixed(1)}</td>
+        <td>${driver.lastLapTime.toFixed(4)}</td>
+        <td>${driver.avgLapTime.toFixed(4)}</td>
+        <td>${driver.bestLapTime.toFixed(4)}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  setInterval(fetchRaceData, 2000);
+  fetchRaceData();
+</script>
+
+</body>
+</html>

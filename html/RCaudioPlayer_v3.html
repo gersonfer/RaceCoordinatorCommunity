@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RC Audio Player</title>
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #121212;
+      color: white;
+      padding: 20px;
+    }
+
+    details {
+      margin-bottom: 15px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #1e1e1e;
+      padding: 10px;
+    }
+
+    summary {
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      color: #ddd;
+    }
+
+    .video-button {
+      background: #2a2a2a;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 15px;
+      display: block;
+      text-align: left;
+      width: 100%;
+    }
+
+    .video-button:hover {
+      background: #444;
+    }
+
+    .description {
+      font-size: 13px;
+      color: #aaa;
+      margin-left: 10px;
+      margin-top: -4px;
+      margin-bottom: 8px;
+    }
+
+    #playerContainer {
+      margin-top: 20px;
+    }
+
+    .plyr__video-embed iframe {
+      width: 100%;
+      height: 80px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .plyr {
+      background: transparent !important;
+    }
+
+    #errorMessage {
+      background: #900;
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>RC Audio Player</h1>
+
+  <div id="content"></div>
+  <div id="playerContainer"></div>
+  <div id="errorMessage">❌ Error loading videos. Please use a web server like <code>http://localhost</code> or host with GitHub Pages.</div>
+
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+  <script>
+    async function loadVideos() {
+      try {
+        const response = await fetch('videos_index.json');
+        if (!response.ok) throw new Error('Fetch error');
+
+        const list = await response.json();
+        const grouped = {};
+
+        list.forEach(video => {
+          const folder = video.pasta || 'general';
+          if (!grouped[folder]) grouped[folder] = [];
+          grouped[folder].push(video);
+        });
+
+        const content = document.getElementById('content');
+        const player = document.getElementById('playerContainer');
+
+        for (const folder in grouped) {
+          const section = document.createElement('details');
+          section.open = false;
+
+          const summary = document.createElement('summary');
+          summary.textContent = `/${folder}`;
+          section.appendChild(summary);
+
+          grouped[folder].forEach(video => {
+            const btn = document.createElement('button');
+            btn.className = 'video-button';
+            btn.textContent = video.nome;
+            btn.title = video.descricao || '';
+            btn.onclick = () => {
+              player.innerHTML = `
+                <div class="plyr__video-embed" id="ytplayer">
+                  <iframe
+                    src="https://www.youtube.com/embed/${video.video_id}?autoplay=1&controls=0&rel=0&showinfo=0&modestbranding=1"
+                    allow="autoplay; encrypted-media"
+                    allowfullscreen
+                    title="YouTube audio player"
+                  ></iframe>
+                </div>
+              `;
+              setTimeout(() => new Plyr('#ytplayer', { controls: ['play', 'mute'] }), 100);
+            };
+            section.appendChild(btn);
+
+            if (video.descricao) {
+              const desc = document.createElement('div');
+              desc.className = 'description';
+              desc.textContent = video.descricao;
+              section.appendChild(desc);
+            }
+          });
+
+          content.appendChild(section);
+        }
+
+      } catch (err) {
+        document.getElementById('errorMessage').style.display = 'block';
+        console.error('Error loading JSON:', err);
+      }
+    }
+
+    loadVideos();
+  </script>
+</body>
+</html>
