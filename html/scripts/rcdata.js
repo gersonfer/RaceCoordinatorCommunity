@@ -390,23 +390,10 @@ function displayHeatPosition (liverace, trackData, heatDriverData)
       var tr=document.createElement('tr');
       // SS For a SRMS row set the rows css class to a different class
       if (config.srms) {
-	 tr.className = "srmsrow";
+	     tr.className = "srmsrow";
       } else {
-         tr.style.backgroundColor = trackData.l[driverNum].c;
-
-          // // Se a cor da fenda for preta, aplicamos estilos específicos
-          const color = trackData.l[driverNum].c.toLowerCase();
-          if (color === '#000000' || color === 'black') {
-	     // Adicionamos uma classe específica
-             tr.classList.add('black-lane');
-
-	     // E aplicamos estilos inline como fallback
-	     tr.style.cssText += 'color: #ffffff !important;';
-	     Array.from(tr.getElementsByTagName('*')).forEach(el => {
-		el.style.cssText += 'color: #ffffff !important;';
-	     });
-           }
-       }
+		 tr.style.backgroundColor = trackData.l[driverNum].c; 
+      }
 	   
 	  // Create column for name
 	  var aLink=document.createElement("a");
@@ -967,21 +954,7 @@ function displayStartLights (lights, heatData)
 // Display driver data for the current heat only
 function displayDriverStationInfo(driverStation, trackData, heatData, heatDriverData)
 {
-   var lane = getParameterByName('lane');
-
-	// If lane is missing in URL, default to lane 0
-	if (lane == null || lane === "") {
-		lane = 0;
-
-		// Update URL so user sees correct usage
-		if (!window.location.search.includes("lane=")) {
-			var newUrl = window.location.pathname + "?lane=0";
-			window.history.replaceState(null, "", newUrl);
-		}
-	}
-
-	// ensure lane is numeric
-	lane = parseInt(lane);
+   var lane = getParameterByName('lane')
 	
    // Diegu, moved colors and borderWidths to begin of function for better reuse
    var borderColour = '#FFFFFF'; // default

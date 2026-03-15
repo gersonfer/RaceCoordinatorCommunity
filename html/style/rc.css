@@ -256,26 +256,3 @@
   font-size: 32pt;
   color: #8BC63F;   // Diegu: Scorpius green
 }
-
-/* Estilo para faixas pretas - alta especificidade */
-table tr.black-lane,
-table tr.black-lane td,
-table tr.black-lane th,
-table tr.black-lane a {
-    color: #ffffff !important;
-    background-color: #000000 !important;
-}
-
-/* Garante que todos os elementos dentro da linha herdem a cor branca */
-table tr.black-lane * {
-    color: inherit !important;
-}
-
-/* Override específico para SRMS se necessário */
-.srmsrow.black-lane,
-.srmsrow.black-lane td,
-.srmsrow.black-lane th,
-.srmsrow.black-lane a {
-    color: #ffffff !important;
-    background-color: #000000 !important;
-}
